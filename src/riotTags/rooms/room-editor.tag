@@ -380,10 +380,24 @@ room-editor.panel.view
 
         /** Change zoom on mouse wheel */
         this.onCanvasWheel = e => {
-            if (e.wheelDelta > 0) {
-                this.refs.zoomslider.zoomIn();
+            // Read up on trackpad detection.
+            // https://stackoverflow.com/a/62415754/2156675
+            // https://medium.com/@auchenberg/detecting-multi-touch-trackpad-gestures-in-javascript-a2505babb10e
+            const isTrackpad = (e.wheelDeltaY && e.wheelDeltaY === (e.deltaY * -3)) || e.deltaMode === 0;
+            const isPanning = isTrackpad && !e.ctrlKey;
+
+            if(isPanning) {
+                // User is panning around.
+                this.roomx += e.deltaX / this.zoomFactor;
+                this.roomy += e.deltaY / this.zoomFactor;
+                this.refreshRoomCanvas();
             } else {
-                this.refs.zoomslider.zoomOut();
+                // User is zooming.
+                if (e.wheelDelta > 0) {
+                    this.refs.zoomslider.zoomIn();
+                } else {
+                    this.refs.zoomslider.zoomOut();
+                }
             }
         };
         this.setZoom = zoom => {
